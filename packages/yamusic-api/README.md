@@ -116,8 +116,14 @@ getCoverUrl("avatars.yandex.net/get-music-content/1/2/%%", "1000x1000");
 
 `likes.tracks` и `likes.dislikes` устроены одинаково: `list`, `add`, `remove`.
 
+API отдаёт для этих списков только ссылки на треки, без названий и исполнителей, поэтому
+`list` возвращает `LibraryTrack` (`id`, `albumId`, `timestamp`). Полные метаданные
+запрашиваются отдельно через `tracks.get`.
+
 ```ts
 const liked = await client.likes.tracks.list();
+const first = liked[0] ? await client.tracks.get(liked[0].id) : null;
+
 await client.likes.tracks.add([456, 457]);
 
 const hidden = await client.likes.dislikes.list();
@@ -140,11 +146,14 @@ await client.playlists.addTracks(3, [{ id: 456, albumId: 2 }], { at: 0 });
 await client.playlists.removeTracks(3, 0, 2);
 
 // Произвольный diff, если готовых обёрток не хватает
-await client.playlists.change(3, { diff: [{ op: "delete", from: 0, to: 0 }] });
+await client.playlists.change(3, [{ op: "delete", from: 0, to: 0 }]);
 ```
 
-Формат diff (`insert`/`delete`) повторяет поведение community-клиентов и пока не проверен
-живым прогоном: при расхождении API вернёт ошибку, а плейлист останется прежним.
+Формат подтверждён живым прогоном: массив операций `insert`/`delete` сериализуется в JSON
+и уходит в query-параметре `diff`. Операция `delete` проверена на реальном плейлисте.
+Вставку трека (`insert`) на аккаунте с большим плейлистом проверить не удалось: API обрывает
+соединение на ответе, состояние плейлиста при этом не меняется. Поэтому `playlists.change`
+остаётся `experimental`, пока `insert` не будет подтверждён на небольшом плейлисте.
 
 ## Модели
 

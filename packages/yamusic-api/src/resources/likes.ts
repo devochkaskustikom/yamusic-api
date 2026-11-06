@@ -1,7 +1,7 @@
 import type { RequestOptions, ResourceContext } from "../client/context.js";
 import type { LikesTracksResponse, MutationResponse } from "../generated/dto.js";
-import { mapTrack } from "../mappers/index.js";
-import type { Track } from "../models/index.js";
+import { mapLibraryTrack } from "../mappers/index.js";
+import type { LibraryTrack } from "../models/index.js";
 import { getTrackId, type Ref } from "../parsers/url-parser.js";
 
 const CHUNK_SIZE = 100;
@@ -36,12 +36,17 @@ abstract class LikeCollectionResource {
   }
 
   /**
-   * Список композиций. По умолчанию - владельца токена.
+   * Список треков в библиотеке. По умолчанию - владельца токена.
+   *
+   * API отдаёт только ссылки (id и albumId), поэтому метод возвращает
+   * `LibraryTrack`, а не полный `Track`. Метаданные запрашиваются отдельно
+   * через `client.tracks.get(id)`.
    *
    * @example
    * const liked = await client.likes.tracks.list();
+   * const first = liked[0] ? await client.tracks.get(liked[0].id) : null;
    */
-  async list(options: LikesListOptions = {}): Promise<readonly Track[]> {
+  async list(options: LikesListOptions = {}): Promise<readonly LibraryTrack[]> {
     const { userId, ...requestOptions } = options;
     const resolved = await this.#ctx.resolveUserId(userId);
 
@@ -51,7 +56,7 @@ abstract class LikeCollectionResource {
       requestOptions,
     );
 
-    return (data.result?.library?.tracks ?? []).map(mapTrack);
+    return (data.result?.library?.tracks ?? []).map(mapLibraryTrack);
   }
 
   /**
@@ -121,7 +126,7 @@ export class LikesDislikesResource extends LikeCollectionResource {
    * const hidden = await client.likes.dislikes.list();
    * await client.likes.dislikes.add(456);
    */
-  declare list: (options?: LikesListOptions) => Promise<readonly Track[]>;
+  declare list: (options?: LikesListOptions) => Promise<readonly LibraryTrack[]>;
 }
 
 export class LikesResource {

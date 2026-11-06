@@ -7,6 +7,8 @@ import { parseYandexUrl } from "../parsers/url-parser.js";
 
 export interface PlaylistsListOptions extends RequestOptions {
   readonly userId?: string | number;
+  /** Категории плейлистов; по умолчанию "3" - свои плейлисты. */
+  readonly kinds?: string | number;
 }
 
 export interface PlaylistRefInput {
@@ -60,12 +62,12 @@ export class PlaylistsResource {
    * console.log(playlists.map((playlist) => playlist.title));
    */
   async list(options: PlaylistsListOptions = {}): Promise<readonly Playlist[]> {
-    const { userId, ...requestOptions } = options;
+    const { userId, kinds = "3", ...requestOptions } = options;
     const resolved = await this.#ctx.resolveUserId(userId);
 
     const data = await this.#ctx.request<PlaylistsResponse>(
       "playlists.list",
-      { path: { userId: resolved } },
+      { path: { userId: resolved }, query: { kinds } },
       requestOptions,
     );
 
@@ -108,8 +110,8 @@ export class PlaylistsResource {
    * Применяет diff к плейлисту. Если revision не передана, ресурс сначала
    * запрашивает плейлист и берёт её из ответа.
    *
-   * Формат diff повторяет поведение community-клиентов и не подтверждён
-   * живым прогоном: операции `insert` и `delete`.
+   * Формат подтверждён живым прогоном: массив операций `insert` и `delete`,
+   * сериализованный в JSON и переданный в query-параметре `diff`.
    *
    * @example
    * const playlist = await client.playlists.get(3);
@@ -127,7 +129,10 @@ export class PlaylistsResource {
 
     const data = await this.#ctx.request<PlaylistResponse>(
       "playlists.change",
-      { path: { userId, kind }, query: { revision }, body: diff },
+      {
+        path: { userId, kind },
+        query: { revision, diff: JSON.stringify(diff) },
+      },
       options,
     );
 
@@ -177,15 +182,13 @@ export class PlaylistsResource {
       }
     }
 
-    const diff: PlaylistDiff = {
-      diff: [
-        {
-          op: "insert",
-          at,
-          tracks: tracks.map((track) => ({ id: track.id, albumId: track.albumId })),
-        },
-      ],
-    };
+    const diff: PlaylistDiff = [
+      {
+        op: "insert",
+        at,
+        tracks: tracks.map((track) => ({ id: track.id, albumId: track.albumId })),
+      },
+    ];
 
     return this.change(input, diff, options);
   }
@@ -213,7 +216,7 @@ export class PlaylistsResource {
       );
     }
 
-    const diff: PlaylistDiff = { diff: [{ op: "delete", from, to }] };
+    const diff: PlaylistDiff = [{ op: "delete", from, to }];
 
     return this.change(input, diff, options);
   }

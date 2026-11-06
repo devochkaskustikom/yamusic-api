@@ -243,7 +243,7 @@ describe("YandexMusicClient: плейлисты и лайки", () => {
 
   it("читает любимые треки", async () => {
     const { client } = createClient(() =>
-      jsonResponse({ result: { library: { tracks: [trackDto] } } }),
+      jsonResponse({ result: { library: { tracks: [{ id: "456", albumId: "2" }] } } }),
     );
 
     const tracks = await client.likes.tracks.list({ userId: "someone" });

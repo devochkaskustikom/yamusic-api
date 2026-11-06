@@ -1386,17 +1386,74 @@ export const shapes: Readonly<Record<string, ShapeNode>> = {
       }
     }
   },
-  "PlaylistDiff": {
+  "PlaylistDiffOperation": {
     "kind": "object",
     "required": [
-      "diff"
+      "op"
     ],
     "fields": {
-      "diff": {
+      "op": {
+        "kind": "primitive",
+        "types": [
+          "string"
+        ]
+      },
+      "at": {
+        "kind": "primitive",
+        "types": [
+          "number"
+        ]
+      },
+      "from": {
+        "kind": "primitive",
+        "types": [
+          "number"
+        ]
+      },
+      "to": {
+        "kind": "primitive",
+        "types": [
+          "number"
+        ]
+      },
+      "tracks": {
         "kind": "array",
         "items": {
           "kind": "unknown"
         }
+      }
+    }
+  },
+  "PlaylistDiff": {
+    "kind": "array",
+    "items": {
+      "kind": "ref",
+      "name": "PlaylistDiffOperation"
+    }
+  },
+  "LibraryTrackRef": {
+    "kind": "object",
+    "required": [
+      "id"
+    ],
+    "fields": {
+      "id": {
+        "kind": "primitive",
+        "types": [
+          "string"
+        ]
+      },
+      "albumId": {
+        "kind": "primitive",
+        "types": [
+          "string"
+        ]
+      },
+      "timestamp": {
+        "kind": "primitive",
+        "types": [
+          "string"
+        ]
       }
     }
   },
@@ -1414,7 +1471,7 @@ export const shapes: Readonly<Record<string, ShapeNode>> = {
         "kind": "array",
         "items": {
           "kind": "ref",
-          "name": "TrackShort"
+          "name": "LibraryTrackRef"
         }
       }
     }

@@ -31,7 +31,7 @@ export class SearchResource {
       throw new InvalidArgumentError("Поисковый запрос не может быть пустым");
     }
 
-    const { type, page, noCorrect, ...requestOptions } = options;
+    const { type, page = 0, noCorrect, ...requestOptions } = options;
 
     const data = await this.#ctx.request<SearchResponse>(
       "search.query",

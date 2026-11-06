@@ -29,13 +29,15 @@ function createClient(handler: Parameters<typeof createMockFetch>[0]) {
 describe("YandexMusicClient: скрытые композиции", () => {
   it("читает список скрытых с явным пользователем", async () => {
     const { client, calls } = createClient(() =>
-      jsonResponse({ result: { library: { tracks: [trackDto] } } }),
+      jsonResponse({
+        result: { library: { tracks: [{ id: "456", albumId: "2", timestamp: "2024-01-01T00:00:00Z" }] } },
+      }),
     );
 
     const tracks = await client.likes.dislikes.list({ userId: "someone" });
 
-    expect(tracks.map((track) => track.id)).toEqual([456]);
-    expect(calls[0]!.url).toBe("https://api.music.yandex.net/users/someone/likes/dislikes");
+    expect(tracks).toEqual([{ id: 456, albumId: 2, timestamp: "2024-01-01T00:00:00Z" }]);
+    expect(calls[0]!.url).toBe("https://api.music.yandex.net/users/someone/dislikes/tracks");
   });
 
   it("скрывает композиции от uid владельца токена", async () => {
@@ -49,7 +51,7 @@ describe("YandexMusicClient: скрытые композиции", () => {
     const post = calls.find((call) => call.init.method === "POST");
     expect(post).toBeDefined();
     const url = new URL(post!.url);
-    expect(url.pathname).toBe("/users/42/likes/dislikes/add");
+    expect(url.pathname).toBe("/users/42/dislikes/tracks/add");
     expect(url.searchParams.get("track-ids")).toBe("456,457");
   });
 
@@ -61,7 +63,7 @@ describe("YandexMusicClient: скрытые композиции", () => {
     await client.likes.dislikes.remove(456);
 
     const post = calls.find((call) => call.init.method === "POST");
-    expect(new URL(post!.url).pathname).toBe("/users/42/likes/dislikes/remove");
+    expect(new URL(post!.url).pathname).toBe("/users/42/dislikes/tracks/remove");
   });
 });
 
@@ -75,7 +77,7 @@ describe("YandexMusicClient: мутации плейлиста", () => {
       return jsonResponse({ result: { kind: 3, title: "Мой", revision: 7 } });
     });
 
-    const diff = { diff: [{ op: "delete", from: 0, to: 0 }] };
+    const diff = [{ op: "delete", from: 0, to: 0 }];
     const playlist = await client.playlists.change(3, diff);
 
     expect(playlist.title).toBe("Обновлён");
@@ -86,7 +88,7 @@ describe("YandexMusicClient: мутации плейлиста", () => {
     const url = new URL(post!.url);
     expect(url.pathname).toBe("/users/42/playlists/3/change");
     expect(url.searchParams.get("revision")).toBe("7");
-    expect(JSON.parse(String(post!.init.body))).toEqual(diff);
+    expect(JSON.parse(url.searchParams.get("diff") ?? "null")).toEqual(diff);
   });
 
   it("строит insert-diff при добавлении треков", async () => {
@@ -101,10 +103,11 @@ describe("YandexMusicClient: мутации плейлиста", () => {
     await client.playlists.addTracks(3, [{ id: 456, albumId: 2 }], { at: 1, revision: 5 });
 
     const post = calls.find((call) => call.init.method === "POST");
-    expect(new URL(post!.url).searchParams.get("revision")).toBe("5");
-    expect(JSON.parse(String(post!.init.body))).toEqual({
-      diff: [{ op: "insert", at: 1, tracks: [{ id: 456, albumId: 2 }] }],
-    });
+    const url = new URL(post!.url);
+    expect(url.searchParams.get("revision")).toBe("5");
+    expect(JSON.parse(url.searchParams.get("diff") ?? "null")).toEqual([
+      { op: "insert", at: 1, tracks: [{ id: 456, albumId: 2 }] },
+    ]);
   });
 
   it("строит delete-diff по диапазону индексов", async () => {
@@ -119,9 +122,9 @@ describe("YandexMusicClient: мутации плейлиста", () => {
     await client.playlists.removeTracks(3, 2, 4, { revision: 5 });
 
     const post = calls.find((call) => call.init.method === "POST");
-    expect(JSON.parse(String(post!.init.body))).toEqual({
-      diff: [{ op: "delete", from: 2, to: 4 }],
-    });
+    expect(JSON.parse(new URL(post!.url).searchParams.get("diff") ?? "null")).toEqual([
+      { op: "delete", from: 2, to: 4 },
+    ]);
   });
 
   it("не отправляет запрос при некорректном диапазоне", async () => {

@@ -657,20 +657,47 @@ components:
         result:
           $ref: '#/components/schemas/Playlist'
 
-    PlaylistDiff:
+    PlaylistDiffOperation:
       type: object
       additionalProperties: true
-      required: [diff]
-      description: >
-        Отличия содержимого плейлиста. Формат повторяет поведение
-        community-клиентов (операции insert/delete) и не подтверждён
-        живым прогоном.
+      required: [op]
       properties:
-        diff:
+        op:
+          type: string
+          enum: [insert, delete]
+        at:
+          type: integer
+        from:
+          type: integer
+        to:
+          type: integer
+        tracks:
           type: array
           items:
             type: object
             additionalProperties: true
+
+    PlaylistDiff:
+      type: array
+      description: >
+        Массив операций над содержимым плейлиста. Передаётся в query-параметре
+        diff как JSON-строка; подтверждено живым прогоном.
+      items:
+        $ref: '#/components/schemas/PlaylistDiffOperation'
+
+    LibraryTrackRef:
+      type: object
+      additionalProperties: true
+      required: [id]
+      description: Ссылка на трек в библиотеке пользователя; полных метаданных не содержит.
+      properties:
+        id:
+          type: string
+        albumId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
 
     Library:
       type: object
@@ -681,7 +708,7 @@ components:
         tracks:
           type: array
           items:
-            $ref: '#/components/schemas/TrackShort'
+            $ref: '#/components/schemas/LibraryTrackRef'
 
     LikesTracksResponse:
       type: object
@@ -712,7 +739,7 @@ paths:
       tags: [account]
       summary: Профиль аккаунта и состояние подписки
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       responses:
         '200':
           description: OK
@@ -743,7 +770,7 @@ paths:
       tags: [search]
       summary: Универсальный поиск
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: text
           in: query
@@ -757,8 +784,10 @@ paths:
             enum: [all, track, artist, album, playlist, podcast, video]
         - name: page
           in: query
+          description: Номер страницы результатов, с нуля.
           schema:
             type: integer
+            default: 0
         - name: nocorrect
           in: query
           schema:
@@ -798,7 +827,7 @@ paths:
       tags: [tracks]
       summary: Композиция по идентификатору
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: trackId
           in: path
@@ -953,13 +982,20 @@ paths:
       tags: [playlists]
       summary: Список плейлистов пользователя
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: userId
           in: path
           required: true
           schema:
             type: string
+        - name: kinds
+          in: query
+          required: true
+          description: Категории плейлистов. "3" - плейлисты самого пользователя.
+          schema:
+            type: string
+            default: '3'
       responses:
         '200':
           description: OK
@@ -974,7 +1010,7 @@ paths:
       tags: [playlists]
       summary: Плейлист пользователя
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: userId
           in: path
@@ -1021,12 +1057,12 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlaylistDiff'
+        - name: diff
+          in: query
+          required: true
+          description: JSON-массив операций insert/delete.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1041,7 +1077,7 @@ paths:
       tags: [likes]
       summary: Список любимых композиций
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: userId
           in: path
@@ -1108,13 +1144,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/MutationResponse'
 
-  /users/{userId}/likes/dislikes:
+  /users/{userId}/dislikes/tracks:
     get:
       operationId: likes.dislikes.list
       tags: [likes]
       summary: Список скрытых композиций
       x-ym-idempotent: true
-      x-ym-status: experimental
+      x-ym-status: stable
       parameters:
         - name: userId
           in: path
@@ -1129,7 +1165,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/LikesTracksResponse'
 
-  /users/{userId}/likes/dislikes/add:
+  /users/{userId}/dislikes/tracks/add:
     post:
       operationId: likes.dislikes.add
       tags: [likes]
@@ -1155,7 +1191,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MutationResponse'
 
-  /users/{userId}/likes/dislikes/remove:
+  /users/{userId}/dislikes/tracks/remove:
     post:
       operationId: likes.dislikes.remove
       tags: [likes]

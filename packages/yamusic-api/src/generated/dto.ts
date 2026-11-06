@@ -302,13 +302,25 @@ export interface PlaylistResponse {
   "result": Playlist;
 }
 
-export interface PlaylistDiff {
-  "diff": Record<string, unknown>[];
+export interface PlaylistDiffOperation {
+  "op": "insert" | "delete";
+  "at"?: number;
+  "from"?: number;
+  "to"?: number;
+  "tracks"?: Record<string, unknown>[];
+}
+
+export type PlaylistDiff = PlaylistDiffOperation[];
+
+export interface LibraryTrackRef {
+  "id": string;
+  "albumId"?: string;
+  "timestamp"?: string;
 }
 
 export interface Library {
   "uid"?: number;
-  "tracks"?: TrackShort[];
+  "tracks"?: LibraryTrackRef[];
 }
 
 export interface LikesTracksResponse {

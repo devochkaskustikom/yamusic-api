@@ -3,6 +3,7 @@ import type {
   Album as AlbumDto,
   AlbumShort,
   Artist as ArtistDto,
+  LibraryTrackRef as LibraryTrackRefDto,
   Lyrics as LyricsDto,
   Playlist as PlaylistDto,
   PlaylistShort,
@@ -16,6 +17,7 @@ import type {
   AlbumRef,
   Artist,
   ArtistRef,
+  LibraryTrack,
   Lyrics,
   Playlist,
   PlaylistOwner,
@@ -56,6 +58,14 @@ export function mapTrack(dto: TrackDto | TrackShort): Track {
     explicit: "explicit" in dto ? dto.explicit : undefined,
     version: dto.version,
     lyricsAvailable: "lyricsAvailable" in dto ? dto.lyricsAvailable : undefined,
+  };
+}
+
+export function mapLibraryTrack(dto: LibraryTrackRefDto): LibraryTrack {
+  return {
+    id: Number(dto.id),
+    albumId: dto.albumId === undefined ? undefined : Number(dto.albumId),
+    timestamp: dto.timestamp,
   };
 }
 
