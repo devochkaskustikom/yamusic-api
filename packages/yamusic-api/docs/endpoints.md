@@ -52,6 +52,7 @@
 | --- | --- | --- | --- |
 | `playlists.list` | `GET /users/{userId}/playlists` | да | `experimental` |
 | `playlists.get` | `GET /users/{userId}/playlists/{kind}` | да | `experimental` |
+| `playlists.change` | `POST /users/{userId}/playlists/{kind}/change` | нет | `experimental` |
 
 ## likes
 
@@ -60,4 +61,7 @@
 | `likes.tracks.list` | `GET /users/{userId}/likes/tracks` | да | `experimental` |
 | `likes.tracks.add` | `POST /users/{userId}/likes/tracks/add-multiple` | нет | `experimental` |
 | `likes.tracks.remove` | `POST /users/{userId}/likes/tracks/remove` | нет | `experimental` |
+| `likes.dislikes.list` | `GET /users/{userId}/likes/dislikes` | да | `experimental` |
+| `likes.dislikes.add` | `POST /users/{userId}/likes/dislikes/add` | нет | `experimental` |
+| `likes.dislikes.remove` | `POST /users/{userId}/likes/dislikes/remove` | нет | `experimental` |
 

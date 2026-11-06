@@ -31,7 +31,7 @@ export class AccountResource {
 
   /**
    * Пользовательские настройки в том виде, в котором их отдаёт сервер.
-   * Структура настроек не документирована, поэтому тип ответа — словарь.
+   * Структура настроек не документирована, поэтому тип ответа - словарь.
    */
   async getSettings(options?: RequestOptions): Promise<Record<string, unknown>> {
     return this.#ctx.request<Record<string, unknown>>("account.getSettings", {}, options);

@@ -167,6 +167,7 @@ export interface PlaylistShort {
   "ogImage"?: string;
   "tags"?: string[];
   "snapshot"?: number;
+  "revision"?: number;
 }
 
 export interface Playlist {
@@ -186,6 +187,7 @@ export interface Playlist {
   "ogImage"?: string;
   "tags"?: string[];
   "snapshot"?: number;
+  "revision"?: number;
   "tracks"?: (Track | null)[];
 }
 
@@ -298,6 +300,10 @@ export interface PlaylistsResponse {
 export interface PlaylistResponse {
   "invocationInfo"?: InvocationInfo;
   "result": Playlist;
+}
+
+export interface PlaylistDiff {
+  "diff": Record<string, unknown>[];
 }
 
 export interface Library {

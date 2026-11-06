@@ -13,12 +13,12 @@ console.log(`Плейлистов в библиотеке: ${playlists.length}`)
 
 for (const playlist of playlists.slice(0, 10)) {
   const count = playlist.trackCount ?? playlist.tracks?.length ?? "?";
-  console.log(`  [${playlist.kind}] ${playlist.title} — ${count} треков`);
+  console.log(`  [${playlist.kind}] ${playlist.title} - ${count} треков`);
 }
 
 const kind = Number(process.argv[2] ?? playlists[0]?.kind);
 if (!Number.isSafeInteger(kind) || kind <= 0) {
-  console.log("\nПлейлистов нет — показывать нечего.");
+  console.log("\nПлейлистов нет - показывать нечего.");
   process.exit(0);
 }
 
@@ -27,7 +27,7 @@ console.log(`\n${playlist.title}: ${playlist.tracks?.length ?? playlist.trackCou
 
 for (const track of (playlist.tracks ?? []).slice(0, 5)) {
   const artists = track.artists.map((artist) => artist.name).join(", ");
-  console.log(`  ${track.title} — ${artists}`);
+  console.log(`  ${track.title} - ${artists}`);
 }
 
 // Мутация библиотеки выполняется только по явному флагу --like <trackId>.

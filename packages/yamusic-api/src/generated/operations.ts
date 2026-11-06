@@ -9,6 +9,7 @@ import type {
   LikesTracksResponse,
   LyricsResponse,
   MutationResponse,
+  PlaylistDiff,
   PlaylistResponse,
   PlaylistsResponse,
   SearchResponse,
@@ -30,6 +31,7 @@ export interface OperationDescriptorSpec {
   readonly status: EndpointStatus;
   readonly pathParams: readonly string[];
   readonly queryParams: readonly string[];
+  readonly requestBodySchema: string | null;
   readonly responseSchema: string | null;
 }
 
@@ -42,6 +44,7 @@ export const operations = {
   "status": "experimental",
   "pathParams": [],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "AccountStatusResponse"
 } as const,
   "account.getSettings": {
@@ -52,6 +55,7 @@ export const operations = {
   "status": "experimental",
   "pathParams": [],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": null
 } as const,
   "search.query": {
@@ -67,6 +71,7 @@ export const operations = {
     "page",
     "nocorrect"
   ],
+  "requestBodySchema": null,
   "responseSchema": "SearchResponse"
 } as const,
   "search.suggest": {
@@ -79,6 +84,7 @@ export const operations = {
   "queryParams": [
     "part"
   ],
+  "requestBodySchema": null,
   "responseSchema": "SuggestResponse"
 } as const,
   "tracks.get": {
@@ -91,6 +97,7 @@ export const operations = {
     "trackId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "TracksResponse"
 } as const,
   "tracks.getLyrics": {
@@ -103,6 +110,7 @@ export const operations = {
     "trackId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "LyricsResponse"
 } as const,
   "tracks.getSimilar": {
@@ -115,6 +123,7 @@ export const operations = {
     "trackId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "SimilarTracksResponse"
 } as const,
   "albums.get": {
@@ -127,6 +136,7 @@ export const operations = {
     "albumId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "AlbumResponse"
 } as const,
   "albums.getWithTracks": {
@@ -139,6 +149,7 @@ export const operations = {
     "albumId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "AlbumResponse"
 } as const,
   "artists.get": {
@@ -151,6 +162,7 @@ export const operations = {
     "artistId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "ArtistResponse"
 } as const,
   "artists.getTracks": {
@@ -166,6 +178,7 @@ export const operations = {
     "page",
     "page-size"
   ],
+  "requestBodySchema": null,
   "responseSchema": "ArtistTracksResponse"
 } as const,
   "playlists.list": {
@@ -178,6 +191,7 @@ export const operations = {
     "userId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "PlaylistsResponse"
 } as const,
   "playlists.get": {
@@ -191,6 +205,23 @@ export const operations = {
     "kind"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
+  "responseSchema": "PlaylistResponse"
+} as const,
+  "playlists.change": {
+  "method": "POST",
+  "path": "/users/{userId}/playlists/{kind}/change",
+  "tag": "playlists",
+  "idempotent": false,
+  "status": "experimental",
+  "pathParams": [
+    "userId",
+    "kind"
+  ],
+  "queryParams": [
+    "revision"
+  ],
+  "requestBodySchema": "PlaylistDiff",
   "responseSchema": "PlaylistResponse"
 } as const,
   "likes.tracks.list": {
@@ -203,6 +234,7 @@ export const operations = {
     "userId"
   ],
   "queryParams": [],
+  "requestBodySchema": null,
   "responseSchema": "LikesTracksResponse"
 } as const,
   "likes.tracks.add": {
@@ -217,6 +249,7 @@ export const operations = {
   "queryParams": [
     "track-ids"
   ],
+  "requestBodySchema": null,
   "responseSchema": "MutationResponse"
 } as const,
   "likes.tracks.remove": {
@@ -231,6 +264,50 @@ export const operations = {
   "queryParams": [
     "track-ids"
   ],
+  "requestBodySchema": null,
+  "responseSchema": "MutationResponse"
+} as const,
+  "likes.dislikes.list": {
+  "method": "GET",
+  "path": "/users/{userId}/likes/dislikes",
+  "tag": "likes",
+  "idempotent": true,
+  "status": "experimental",
+  "pathParams": [
+    "userId"
+  ],
+  "queryParams": [],
+  "requestBodySchema": null,
+  "responseSchema": "LikesTracksResponse"
+} as const,
+  "likes.dislikes.add": {
+  "method": "POST",
+  "path": "/users/{userId}/likes/dislikes/add",
+  "tag": "likes",
+  "idempotent": false,
+  "status": "experimental",
+  "pathParams": [
+    "userId"
+  ],
+  "queryParams": [
+    "track-ids"
+  ],
+  "requestBodySchema": null,
+  "responseSchema": "MutationResponse"
+} as const,
+  "likes.dislikes.remove": {
+  "method": "POST",
+  "path": "/users/{userId}/likes/dislikes/remove",
+  "tag": "likes",
+  "idempotent": false,
+  "status": "experimental",
+  "pathParams": [
+    "userId"
+  ],
+  "queryParams": [
+    "track-ids"
+  ],
+  "requestBodySchema": null,
   "responseSchema": "MutationResponse"
 } as const,
 } as const satisfies Record<string, OperationDescriptorSpec>;
@@ -251,9 +328,13 @@ export interface OperationResponseMap {
   "artists.getTracks": ArtistTracksResponse;
   "playlists.list": PlaylistsResponse;
   "playlists.get": PlaylistResponse;
+  "playlists.change": PlaylistResponse;
   "likes.tracks.list": LikesTracksResponse;
   "likes.tracks.add": MutationResponse;
   "likes.tracks.remove": MutationResponse;
+  "likes.dislikes.list": LikesTracksResponse;
+  "likes.dislikes.add": MutationResponse;
+  "likes.dislikes.remove": MutationResponse;
 }
 
 export type OperationResponse<T extends OperationId> = OperationResponseMap[T];
@@ -268,19 +349,32 @@ export interface OperationPathParamsMap {
   "artists.getTracks": { "artistId": number };
   "playlists.list": { "userId": string };
   "playlists.get": { "userId": string; "kind": number };
+  "playlists.change": { "userId": string; "kind": number };
   "likes.tracks.list": { "userId": string };
   "likes.tracks.add": { "userId": string };
   "likes.tracks.remove": { "userId": string };
+  "likes.dislikes.list": { "userId": string };
+  "likes.dislikes.add": { "userId": string };
+  "likes.dislikes.remove": { "userId": string };
 }
 
 export interface OperationQueryParamsMap {
   "search.query": { "text": string; "type"?: "all" | "track" | "artist" | "album" | "playlist" | "podcast" | "video" | undefined; "page"?: number | undefined; "nocorrect"?: boolean | undefined };
   "search.suggest": { "part": string };
   "artists.getTracks": { "page"?: number | undefined; "page-size"?: number | undefined };
+  "playlists.change": { "revision": number };
   "likes.tracks.add": { "track-ids": string };
   "likes.tracks.remove": { "track-ids": string };
+  "likes.dislikes.add": { "track-ids": string };
+  "likes.dislikes.remove": { "track-ids": string };
 }
 
 export type OperationPathParams<T extends keyof OperationPathParamsMap> = OperationPathParamsMap[T];
 
 export type OperationQueryParams<T extends keyof OperationQueryParamsMap> = OperationQueryParamsMap[T];
+
+export interface OperationBodyMap {
+  "playlists.change": PlaylistDiff;
+}
+
+export type OperationBody<T extends OperationId> = T extends keyof OperationBodyMap ? OperationBodyMap[T] : never;

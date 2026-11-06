@@ -15,9 +15,9 @@ console.log(`Подписка Plus: ${account.plus?.hasPlus ? "есть" : "не
 const query = process.argv[2] ?? "Кино";
 const found = await client.search.query(query, { type: "track" });
 
-console.log(`\n«${query}»: найдено треков — ${found.totals.tracks ?? found.tracks.length}`);
+console.log(`\n«${query}»: найдено треков - ${found.totals.tracks ?? found.tracks.length}`);
 for (const track of found.tracks.slice(0, 5)) {
   const artists = track.artists.map((artist) => artist.name).join(", ");
   const seconds = Math.round((track.durationMs ?? 0) / 1000);
-  console.log(`  ${track.title} — ${artists} (${seconds} с)`);
+  console.log(`  ${track.title} - ${artists} (${seconds} с)`);
 }

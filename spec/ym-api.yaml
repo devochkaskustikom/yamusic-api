@@ -373,6 +373,8 @@ components:
             type: string
         snapshot:
           type: integer
+        revision:
+          type: integer
 
     Playlist:
       type: object
@@ -412,6 +414,8 @@ components:
           items:
             type: string
         snapshot:
+          type: integer
+        revision:
           type: integer
         tracks:
           type: array
@@ -652,6 +656,21 @@ components:
           $ref: '#/components/schemas/InvocationInfo'
         result:
           $ref: '#/components/schemas/Playlist'
+
+    PlaylistDiff:
+      type: object
+      additionalProperties: true
+      required: [diff]
+      description: >
+        Отличия содержимого плейлиста. Формат повторяет поведение
+        community-клиентов (операции insert/delete) и не подтверждён
+        живым прогоном.
+      properties:
+        diff:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
 
     Library:
       type: object
@@ -975,6 +994,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlaylistResponse'
 
+  /users/{userId}/playlists/{kind}/change:
+    post:
+      operationId: playlists.change
+      tags: [playlists]
+      summary: Изменить содержимое плейлиста
+      description: >
+        Применяет diff к плейлисту. revision берётся из ответа playlists.get;
+        при устаревшей ревизии API отвечает ошибкой, и diff нужно построить
+        заново от свежего состояния.
+      x-ym-idempotent: false
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: revision
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistDiff'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistResponse'
+
   /users/{userId}/likes/tracks:
     get:
       operationId: likes.tracks.list
@@ -1027,6 +1087,79 @@ paths:
       operationId: likes.tracks.remove
       tags: [likes]
       summary: Убрать композиции из любимых
+      x-ym-idempotent: false
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: track-ids
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationResponse'
+
+  /users/{userId}/likes/dislikes:
+    get:
+      operationId: likes.dislikes.list
+      tags: [likes]
+      summary: Список скрытых композиций
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikesTracksResponse'
+
+  /users/{userId}/likes/dislikes/add:
+    post:
+      operationId: likes.dislikes.add
+      tags: [likes]
+      summary: Скрыть композиции
+      x-ym-idempotent: false
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: track-ids
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationResponse'
+
+  /users/{userId}/likes/dislikes/remove:
+    post:
+      operationId: likes.dislikes.remove
+      tags: [likes]
+      summary: Вернуть скрытые композиции
       x-ym-idempotent: false
       x-ym-status: experimental
       parameters:

@@ -38,6 +38,10 @@ interface Operation {
   readonly tags?: readonly string[];
   readonly summary?: string;
   readonly parameters?: readonly Parameter[];
+  readonly requestBody?: {
+    readonly required?: boolean;
+    readonly content?: Readonly<Record<string, { readonly schema?: Schema }>>;
+  };
   readonly responses?: Readonly<Record<string, Response>>;
   readonly "x-ym-idempotent"?: boolean;
   readonly "x-ym-status"?: string;
@@ -204,6 +208,7 @@ interface CollectedOperation {
   readonly status: (typeof STATUSES)[number];
   readonly pathParams: readonly Parameter[];
   readonly queryParams: readonly Parameter[];
+  readonly requestBodySchema: Schema | undefined;
   readonly responseSchema: Schema | undefined;
 }
 
@@ -222,6 +227,8 @@ function collectOperations(spec: Spec): CollectedOperation[] {
       if (!STATUSES.includes(status as (typeof STATUSES)[number])) {
         throw new Error(`Unknown x-ym-status "${status}" on ${operation.operationId}`);
       }
+      const requestBodySchema =
+        operation.requestBody?.content?.["application/json"]?.schema;
       const responseSchema =
         operation.responses?.["200"]?.content?.["application/json"]?.schema;
       collected.push({
@@ -233,6 +240,7 @@ function collectOperations(spec: Spec): CollectedOperation[] {
         status: status as (typeof STATUSES)[number],
         pathParams: parameters.filter((parameter) => parameter.in === "path"),
         queryParams: parameters.filter((parameter) => parameter.in === "query"),
+        requestBodySchema,
         responseSchema,
       });
     }
@@ -260,6 +268,21 @@ function emitOperations(operations: readonly CollectedOperation[]): string {
     return `  ${JSON.stringify(operation.id)}: ${type};`;
   });
 
+  const bodyEntries = operations
+    .filter((operation) => operation.requestBodySchema !== undefined)
+    .map((operation) => {
+      const type = emitType(operation.requestBodySchema);
+      for (const name of Object.values(specSchemaNames)) {
+        if (new RegExp(`\\b${name}\\b`).test(type)) usedDtos.add(name);
+      }
+      return `  ${JSON.stringify(operation.id)}: ${type};`;
+    });
+
+  const bodyMapBlock =
+    bodyEntries.length > 0
+      ? ["export interface OperationBodyMap {", bodyEntries.join("\n"), "}"].join("\n")
+      : "export type OperationBodyMap = Record<string, never>;";
+
   const descriptorEntries = operations.map((operation) => {
     const descriptor = {
       method: operation.method,
@@ -269,6 +292,9 @@ function emitOperations(operations: readonly CollectedOperation[]): string {
       status: operation.status,
       pathParams: operation.pathParams.map((parameter) => parameter.name),
       queryParams: operation.queryParams.map((parameter) => parameter.name),
+      requestBodySchema: operation.requestBodySchema?.$ref
+        ? refName(operation.requestBodySchema.$ref)
+        : null,
       responseSchema: operation.responseSchema?.$ref
         ? refName(operation.responseSchema.$ref)
         : null,
@@ -310,6 +336,7 @@ function emitOperations(operations: readonly CollectedOperation[]): string {
     "  readonly status: EndpointStatus;",
     "  readonly pathParams: readonly string[];",
     "  readonly queryParams: readonly string[];",
+    "  readonly requestBodySchema: string | null;",
     "  readonly responseSchema: string | null;",
     "}",
     "",
@@ -336,6 +363,10 @@ function emitOperations(operations: readonly CollectedOperation[]): string {
     "export type OperationPathParams<T extends keyof OperationPathParamsMap> = OperationPathParamsMap[T];",
     "",
     "export type OperationQueryParams<T extends keyof OperationQueryParamsMap> = OperationQueryParamsMap[T];",
+    "",
+    bodyMapBlock,
+    "",
+    "export type OperationBody<T extends OperationId> = T extends keyof OperationBodyMap ? OperationBodyMap[T] : never;",
     "",
   ].join("\n");
 }

@@ -10,15 +10,33 @@ export interface LikesListOptions extends RequestOptions {
   readonly userId?: string | number;
 }
 
-export class LikesTracksResource {
-  readonly #ctx: ResourceContext;
+type LikeListOperation = "likes.tracks.list" | "likes.dislikes.list";
+type LikeMutateOperation =
+  | "likes.tracks.add"
+  | "likes.tracks.remove"
+  | "likes.dislikes.add"
+  | "likes.dislikes.remove";
 
-  constructor(ctx: ResourceContext) {
+abstract class LikeCollectionResource {
+  readonly #ctx: ResourceContext;
+  readonly #listOperation: LikeListOperation;
+  readonly #addOperation: LikeMutateOperation;
+  readonly #removeOperation: LikeMutateOperation;
+
+  constructor(
+    ctx: ResourceContext,
+    listOperation: LikeListOperation,
+    addOperation: LikeMutateOperation,
+    removeOperation: LikeMutateOperation,
+  ) {
     this.#ctx = ctx;
+    this.#listOperation = listOperation;
+    this.#addOperation = addOperation;
+    this.#removeOperation = removeOperation;
   }
 
   /**
-   * Любимые композиции пользователя. По умолчанию — владельца токена.
+   * Список композиций. По умолчанию — владельца токена.
    *
    * @example
    * const liked = await client.likes.tracks.list();
@@ -28,7 +46,7 @@ export class LikesTracksResource {
     const resolved = await this.#ctx.resolveUserId(userId);
 
     const data = await this.#ctx.request<LikesTracksResponse>(
-      "likes.tracks.list",
+      this.#listOperation,
       { path: { userId: resolved } },
       requestOptions,
     );
@@ -37,7 +55,7 @@ export class LikesTracksResource {
   }
 
   /**
-   * Добавляет композиции в любимые. Принимает один трек или массив.
+   * Добавляет композиции. Принимает один трек или массив.
    * Большие списки отправляются порциями по 100 штук последовательно.
    *
    * @example
@@ -45,21 +63,21 @@ export class LikesTracksResource {
    * await client.likes.tracks.add([456, 457, "https://music.yandex.ru/track/458"]);
    */
   async add(refs: Ref | readonly Ref[], options: RequestOptions = {}): Promise<boolean> {
-    return this.#mutate("likes.tracks.add", refs, options);
+    return this.#mutate(this.#addOperation, refs, options);
   }
 
   /**
-   * Убирает композиции из любимых.
+   * Убирает композиции из списка.
    *
    * @example
    * await client.likes.tracks.remove([456, 457]);
    */
   async remove(refs: Ref | readonly Ref[], options: RequestOptions = {}): Promise<boolean> {
-    return this.#mutate("likes.tracks.remove", refs, options);
+    return this.#mutate(this.#removeOperation, refs, options);
   }
 
   async #mutate(
-    operation: "likes.tracks.add" | "likes.tracks.remove",
+    operation: LikeMutateOperation,
     refs: Ref | readonly Ref[],
     options: RequestOptions,
   ): Promise<boolean> {
@@ -85,10 +103,33 @@ export class LikesTracksResource {
   }
 }
 
+export class LikesTracksResource extends LikeCollectionResource {
+  constructor(ctx: ResourceContext) {
+    super(ctx, "likes.tracks.list", "likes.tracks.add", "likes.tracks.remove");
+  }
+}
+
+export class LikesDislikesResource extends LikeCollectionResource {
+  constructor(ctx: ResourceContext) {
+    super(ctx, "likes.dislikes.list", "likes.dislikes.add", "likes.dislikes.remove");
+  }
+
+  /**
+   * Скрытые композиции: то, что пользователь убрал из рекомендаций.
+   *
+   * @example
+   * const hidden = await client.likes.dislikes.list();
+   * await client.likes.dislikes.add(456);
+   */
+  declare list: (options?: LikesListOptions) => Promise<readonly Track[]>;
+}
+
 export class LikesResource {
   readonly tracks: LikesTracksResource;
+  readonly dislikes: LikesDislikesResource;
 
   constructor(ctx: ResourceContext) {
     this.tracks = new LikesTracksResource(ctx);
+    this.dislikes = new LikesDislikesResource(ctx);
   }
 }

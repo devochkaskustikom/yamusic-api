@@ -19,6 +19,7 @@ export interface Playlist {
   readonly collective?: boolean;
   readonly created?: string;
   readonly modified?: string;
+  readonly revision?: number;
   readonly coverUri?: string;
   readonly coverUrl?: string;
   readonly tags: readonly string[];

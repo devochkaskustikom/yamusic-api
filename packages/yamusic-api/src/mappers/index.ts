@@ -126,6 +126,7 @@ export function mapPlaylist(dto: PlaylistDto | PlaylistShort): Playlist {
     collective: dto.collective,
     created: dto.created,
     modified: dto.modified,
+    revision: dto.revision,
     coverUri,
     coverUrl: getCoverUrl(coverUri),
     tags: dto.tags ?? [],

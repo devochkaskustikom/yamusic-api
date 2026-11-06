@@ -824,6 +824,12 @@ export const shapes: Readonly<Record<string, ShapeNode>> = {
         "types": [
           "number"
         ]
+      },
+      "revision": {
+        "kind": "primitive",
+        "types": [
+          "number"
+        ]
       }
     }
   },
@@ -923,6 +929,12 @@ export const shapes: Readonly<Record<string, ShapeNode>> = {
         }
       },
       "snapshot": {
+        "kind": "primitive",
+        "types": [
+          "number"
+        ]
+      },
+      "revision": {
         "kind": "primitive",
         "types": [
           "number"
@@ -1371,6 +1383,20 @@ export const shapes: Readonly<Record<string, ShapeNode>> = {
       "result": {
         "kind": "ref",
         "name": "Playlist"
+      }
+    }
+  },
+  "PlaylistDiff": {
+    "kind": "object",
+    "required": [
+      "diff"
+    ],
+    "fields": {
+      "diff": {
+        "kind": "array",
+        "items": {
+          "kind": "unknown"
+        }
       }
     }
   },
