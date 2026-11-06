@@ -36,7 +36,7 @@ abstract class LikeCollectionResource {
   }
 
   /**
-   * Список композиций. По умолчанию — владельца токена.
+   * Список композиций. По умолчанию - владельца токена.
    *
    * @example
    * const liked = await client.likes.tracks.list();

@@ -34,7 +34,7 @@ export interface PlaylistTrackInput {
 }
 
 export interface PlaylistAddOptions extends PlaylistMutationOptions {
-  /** Индекс вставки; 0 — начало плейлиста. */
+  /** Индекс вставки; 0 - начало плейлиста. */
   readonly at?: number;
 }
 
