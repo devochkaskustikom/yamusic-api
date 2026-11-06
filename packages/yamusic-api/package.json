@@ -2,7 +2,25 @@
   "name": "@dvkskustikom/yamusic-api",
   "version": "0.1.0",
   "description": "Unofficial TypeScript SDK for the Yandex Music API",
+  "keywords": [
+    "yandex-music",
+    "api",
+    "sdk",
+    "client",
+    "typescript",
+    "music"
+  ],
+  "author": "dvkskustikom",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devochkaskustikom/yamusic-api.git",
+    "directory": "packages/yamusic-api"
+  },
+  "homepage": "https://github.com/devochkaskustikom/yamusic-api#readme",
+  "bugs": {
+    "url": "https://github.com/devochkaskustikom/yamusic-api/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -31,6 +49,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "pnpm build && pnpm test",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
