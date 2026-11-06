@@ -1,0 +1,12 @@
+{
+  "name": "examples",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "basic": "node basic.mjs",
+    "playlists": "node playlists.mjs"
+  },
+  "dependencies": {
+    "@dvkskustikom/yamusic-api": "workspace:*"
+  }
+}

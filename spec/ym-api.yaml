@@ -1,0 +1,1049 @@
+openapi: 3.1.0
+info:
+  title: Yandex Music API (unofficial)
+  version: 0.1.0
+  description: >
+    Спецификация неофициального HTTP API Яндекс Музыки.
+    Источник правды для codegen. Все операции помечены статусом
+    x-ym-status; статус stable выставляется только после проверки
+    на живом API владельцем пакета.
+servers:
+  - url: https://api.music.yandex.net
+security:
+  - OAuth: []
+components:
+  securitySchemes:
+    OAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    InvocationInfo:
+      type: object
+      additionalProperties: true
+      properties:
+        req-id:
+          type: string
+        hostname:
+          type: string
+
+    Account:
+      type: object
+      additionalProperties: true
+      required: [uid]
+      properties:
+        now:
+          type: string
+        uid:
+          type: integer
+        login:
+          type: string
+        fullName:
+          type: string
+        firstName:
+          type: string
+        secondName:
+          type: string
+        displayName:
+          type: string
+        serviceAvailable:
+          type: boolean
+        hostedUser:
+          type: boolean
+
+    Plus:
+      type: object
+      additionalProperties: true
+      properties:
+        hasPlus:
+          type: boolean
+        isTutorialCompleted:
+          type: boolean
+        migrationCompleted:
+          type: boolean
+
+    AccountStatusResult:
+      type: object
+      additionalProperties: true
+      required: [account]
+      properties:
+        account:
+          $ref: '#/components/schemas/Account'
+        defaultEmail:
+          type: string
+        plus:
+          $ref: '#/components/schemas/Plus'
+
+    AccountStatusResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/AccountStatusResult'
+
+    ArtistCover:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+        uri:
+          type: string
+
+    ArtistCounts:
+      type: object
+      additionalProperties: true
+      properties:
+        tracks:
+          type: integer
+        directAlbums:
+          type: integer
+        alsoAlbums:
+          type: integer
+        alsoTracks:
+          type: integer
+
+    ArtistRatings:
+      type: object
+      additionalProperties: true
+      properties:
+        month:
+          type: integer
+        week:
+          type: integer
+        day:
+          type: integer
+
+    ArtistLink:
+      type: object
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        href:
+          type: string
+
+    Artist:
+      type: object
+      additionalProperties: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        composer:
+          type: boolean
+        various:
+          type: boolean
+        available:
+          type: boolean
+        cover:
+          $ref: '#/components/schemas/ArtistCover'
+        genres:
+          type: array
+          items:
+            type: string
+        counts:
+          $ref: '#/components/schemas/ArtistCounts'
+        ratings:
+          $ref: '#/components/schemas/ArtistRatings'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtistLink'
+        noPicturesFromSearch:
+          type: boolean
+
+    AlbumShort:
+      type: object
+      additionalProperties: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        year:
+          type: integer
+        releaseDate:
+          type: string
+        coverUri:
+          type: string
+        genre:
+          type: string
+        metaType:
+          type: string
+        available:
+          type: boolean
+
+    TrackShort:
+      type: object
+      additionalProperties: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        realId:
+          type: integer
+        title:
+          type: string
+        available:
+          type: boolean
+        version:
+          type: string
+        type:
+          type: string
+        coverUri:
+          type: string
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+        albums:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlbumShort'
+
+    Track:
+      type: object
+      additionalProperties: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        realId:
+          type: integer
+        title:
+          type: string
+        available:
+          type: boolean
+        version:
+          type: string
+        type:
+          type: string
+        coverUri:
+          type: string
+        durationMs:
+          type: integer
+        explicit:
+          type: boolean
+        lyricsAvailable:
+          type: boolean
+        shortDescription:
+          type: string
+        fileSize:
+          type: integer
+        regions:
+          type: array
+          items:
+            type: string
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+        albums:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlbumShort'
+
+    Label:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        website:
+          type: string
+
+    Album:
+      type: object
+      additionalProperties: true
+      required: [id]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        version:
+          type: string
+        coverUri:
+          type: string
+        trackCount:
+          type: integer
+        genre:
+          type: string
+        year:
+          type: integer
+        releaseDate:
+          type: string
+        metaType:
+          type: string
+        available:
+          type: boolean
+        availableForPremiumUsers:
+          type: boolean
+        availablePartially:
+          type: boolean
+        artists:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Label'
+        volumes:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+
+    Owner:
+      type: object
+      additionalProperties: true
+      required: [uid]
+      properties:
+        uid:
+          type: integer
+        login:
+          type: string
+        name:
+          type: string
+        verified:
+          type: boolean
+
+    PlaylistCover:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+        uri:
+          type: string
+
+    PlaylistShort:
+      type: object
+      additionalProperties: true
+      required: [kind]
+      properties:
+        owner:
+          $ref: '#/components/schemas/Owner'
+        uid:
+          type: integer
+        kind:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        trackCount:
+          type: integer
+        visibility:
+          type: string
+        collective:
+          type: boolean
+        created:
+          type: string
+        modified:
+          type: string
+        available:
+          type: boolean
+        durationMs:
+          type: integer
+        cover:
+          $ref: '#/components/schemas/PlaylistCover'
+        ogImage:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        snapshot:
+          type: integer
+
+    Playlist:
+      type: object
+      additionalProperties: true
+      required: [kind]
+      properties:
+        owner:
+          $ref: '#/components/schemas/Owner'
+        uid:
+          type: integer
+        kind:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        trackCount:
+          type: integer
+        visibility:
+          type: string
+        collective:
+          type: boolean
+        created:
+          type: string
+        modified:
+          type: string
+        available:
+          type: boolean
+        durationMs:
+          type: integer
+        cover:
+          $ref: '#/components/schemas/PlaylistCover'
+        ogImage:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        snapshot:
+          type: integer
+        tracks:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/Track'
+              - type: 'null'
+
+    SearchTracksBlock:
+      type: object
+      additionalProperties: true
+      properties:
+        total:
+          type: integer
+        perPage:
+          type: integer
+        order:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackShort'
+
+    SearchArtistsBlock:
+      type: object
+      additionalProperties: true
+      properties:
+        total:
+          type: integer
+        perPage:
+          type: integer
+        order:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artist'
+
+    SearchAlbumsBlock:
+      type: object
+      additionalProperties: true
+      properties:
+        total:
+          type: integer
+        perPage:
+          type: integer
+        order:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Album'
+
+    SearchPlaylistsBlock:
+      type: object
+      additionalProperties: true
+      properties:
+        total:
+          type: integer
+        perPage:
+          type: integer
+        order:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Playlist'
+
+    SearchBest:
+      type: object
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+        text:
+          type: string
+
+    SearchResult:
+      type: object
+      additionalProperties: true
+      properties:
+        best:
+          $ref: '#/components/schemas/SearchBest'
+        tracks:
+          $ref: '#/components/schemas/SearchTracksBlock'
+        artists:
+          $ref: '#/components/schemas/SearchArtistsBlock'
+        albums:
+          $ref: '#/components/schemas/SearchAlbumsBlock'
+        playlists:
+          $ref: '#/components/schemas/SearchPlaylistsBlock'
+
+    SearchResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/SearchResult'
+
+    SuggestItem:
+      type: object
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        type:
+          type: string
+
+    SuggestResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        result:
+          type: object
+          additionalProperties: true
+          properties:
+            suggestions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SuggestItem'
+
+    Lyrics:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        lyrics:
+          type: string
+        hasRights:
+          type: boolean
+        textColor:
+          type: string
+        background:
+          type: string
+
+    LyricsResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        result:
+          oneOf:
+            - $ref: '#/components/schemas/Lyrics'
+            - type: 'null'
+
+    SimilarTracks:
+      type: object
+      additionalProperties: true
+      properties:
+        track:
+          $ref: '#/components/schemas/Track'
+        similarTracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+
+    SimilarTracksResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        result:
+          $ref: '#/components/schemas/SimilarTracks'
+
+    TracksResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/Track'
+
+    AlbumResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/Album'
+
+    ArtistResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/Artist'
+
+    ArtistTracksResult:
+      type: object
+      additionalProperties: true
+      properties:
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackShort'
+
+    ArtistTracksResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/ArtistTracksResult'
+
+    PlaylistsResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaylistShort'
+
+    PlaylistResponse:
+      type: object
+      additionalProperties: true
+      required: [result]
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          $ref: '#/components/schemas/Playlist'
+
+    Library:
+      type: object
+      additionalProperties: true
+      properties:
+        uid:
+          type: integer
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackShort'
+
+    LikesTracksResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          type: object
+          additionalProperties: true
+          properties:
+            library:
+              $ref: '#/components/schemas/Library'
+
+    MutationResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        invocationInfo:
+          $ref: '#/components/schemas/InvocationInfo'
+        result:
+          type: boolean
+
+paths:
+  /account/status:
+    get:
+      operationId: account.getStatus
+      tags: [account]
+      summary: Профиль аккаунта и состояние подписки
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatusResponse'
+
+  /account/settings:
+    get:
+      operationId: account.getSettings
+      tags: [account]
+      summary: Пользовательские настройки
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /search:
+    get:
+      operationId: search.query
+      tags: [search]
+      summary: Универсальный поиск
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: text
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, track, artist, album, playlist, podcast, video]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: nocorrect
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  /search/suggest:
+    get:
+      operationId: search.suggest
+      tags: [search]
+      summary: Подсказки поиска
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: part
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestResponse'
+
+  /tracks/{trackId}:
+    get:
+      operationId: tracks.get
+      tags: [tracks]
+      summary: Композиция по идентификатору
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TracksResponse'
+
+  /tracks/{trackId}/lyrics:
+    get:
+      operationId: tracks.getLyrics
+      tags: [tracks]
+      summary: Текст композиции
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LyricsResponse'
+
+  /tracks/{trackId}/similar:
+    get:
+      operationId: tracks.getSimilar
+      tags: [tracks]
+      summary: Похожие композиции
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimilarTracksResponse'
+
+  /albums/{albumId}:
+    get:
+      operationId: albums.get
+      tags: [albums]
+      summary: Альбом
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: albumId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumResponse'
+
+  /albums/{albumId}/with-tracks:
+    get:
+      operationId: albums.getWithTracks
+      tags: [albums]
+      summary: Альбом вместе с треками
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: albumId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlbumResponse'
+
+  /artists/{artistId}:
+    get:
+      operationId: artists.get
+      tags: [artists]
+      summary: Исполнитель
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: artistId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistResponse'
+
+  /artists/{artistId}/tracks:
+    get:
+      operationId: artists.getTracks
+      tags: [artists]
+      summary: Композиции исполнителя
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: artistId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: page-size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtistTracksResponse'
+
+  /users/{userId}/playlists:
+    get:
+      operationId: playlists.list
+      tags: [playlists]
+      summary: Список плейлистов пользователя
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistsResponse'
+
+  /users/{userId}/playlists/{kind}:
+    get:
+      operationId: playlists.get
+      tags: [playlists]
+      summary: Плейлист пользователя
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: kind
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistResponse'
+
+  /users/{userId}/likes/tracks:
+    get:
+      operationId: likes.tracks.list
+      tags: [likes]
+      summary: Список любимых композиций
+      x-ym-idempotent: true
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikesTracksResponse'
+
+  /users/{userId}/likes/tracks/add-multiple:
+    post:
+      operationId: likes.tracks.add
+      tags: [likes]
+      summary: Добавить композиции в любимые
+      x-ym-idempotent: false
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: track-ids
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationResponse'
+
+  /users/{userId}/likes/tracks/remove:
+    post:
+      operationId: likes.tracks.remove
+      tags: [likes]
+      summary: Убрать композиции из любимых
+      x-ym-idempotent: false
+      x-ym-status: experimental
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: track-ids
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationResponse'
